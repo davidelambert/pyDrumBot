@@ -34,51 +34,48 @@ class MainWindow(QMainWindow):
         self.playing = False
 
         layout = QGridLayout()
-        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(24)
         
         wrapper = QWidget()
         wrapper.setLayout(layout)
-        
-        self.bpm_label = QLabel('Beats Per Minute')
-        self.bpm_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.bpm_slider = QSlider(Qt.Horizontal)
-        self.bpm_slider.setTickPosition(QSlider.TickPosition.TicksBothSides)
-        self.bpm_slider.setTickInterval(20)
-        self.bpm_slider.setRange(60, 240)
-        self.bpm_slider.setValue(100)
-        self.bpm_slider.valueChanged.connect(self.bpm_changed)
-        self.bpm_value = QLabel('100')
 
-        self.rp_label = QLabel('Rest Probability')
-        self.rp_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.rp_slider = QSlider(Qt.Horizontal)
-        self.rp_slider.setTickPosition(QSlider.TickPosition.TicksBothSides)
-        self.rp_slider.setTickInterval(10)
-        self.rp_slider.setRange(0, 99)
-        self.rp_slider.setValue(10)
-        self.rp_slider.valueChanged.connect(self.rp_changed)
-        self.rp_value = QLabel('10%')
+        self.header = QLabel('drumbot')
+
+        self.bpm_ctl = LVSlider(label='Beats per Minute',
+                                value_range=(60, 240),
+                                tick_interval=20,
+                                initial_value=100)
+        self.bpm_ctl.slider.valueChanged.connect(self.bpm_changed)
+
+        self.rp_ctl = LVSlider(label='Rest Probability',
+                               value_range=(0, 99),
+                               tick_interval=10,
+                               initial_value=10,
+                               value_label_suffix='%')
+        self.rp_ctl.slider.valueChanged.connect(self.rp_changed)
 
         # row 0
-        layout.addWidget(self.bpm_label, 0, 0)
-        layout.addWidget(self.bpm_slider, 0, 1, 1, 4)
-        layout.addWidget(self.bpm_value, 0, 5, 1, 1)
+        layout.addWidget(self.header, 0, 0)
         # row 1
-        layout.addWidget(self.rp_label, 1, 0)
-        layout.addWidget(self.rp_slider, 1, 1, 1, 4)
-        layout.addWidget(self.rp_value, 1, 5, 1, 1)
+        layout.addWidget(self.bpm_ctl.label, 1, 0)
+        layout.addWidget(self.bpm_ctl.slider, 1, 1, 1, 4)
+        layout.addWidget(self.bpm_ctl.value_label, 1, 5, 1, 1)
+        # row 2
+        layout.addWidget(self.rp_ctl.label, 2, 0)
+        layout.addWidget(self.rp_ctl.slider, 2, 1, 1, 4)
+        layout.addWidget(self.rp_ctl.value_label, 2, 5, 1, 1)
 
         self.setCentralWidget(wrapper)
 
     def bpm_changed(self, n):
         self.bpm = n
-        self.bpm_value.setText(f'{self.bpm}')
+        self.bpm_ctl.value_label.setText(f'{self.bpm}')
         print(f'bpm_changed: {n}; self.bpm={self.bpm}')
 
     def rp_changed(self, n):
         self.rest_prob = n
-        self.rp_value.setText(f'{self.rest_prob}%')
+        self.rp_ctl.value_label.setText(f'{self.rest_prob}%')
         print(f'rp_changed: {n}; self.rest_prob={self.rest_prob}')
         
 

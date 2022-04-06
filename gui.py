@@ -3,12 +3,18 @@ from pathlib import Path
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
+import simpleaudio as sa
+
+samples = {fp.stem: sa.WaveObject.from_wave_file(str(fp))
+           for fp in Path('./kit-default').iterdir()}
+hands = samples.copy()
+kick = hands.pop('kick')
 
 
 class LVSlider:
     def __init__(self, label: str, value_range: tuple[int], tick_interval: int,
                  initial_value: int,  value_label_suffix=''):
-        
+
         self.label = QLabel(label)
         self.label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.value_label = QLabel(str(initial_value) + value_label_suffix)
@@ -36,7 +42,7 @@ class MainWindow(QMainWindow):
         layout = QGridLayout()
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(24)
-        
+
         wrapper = QWidget()
         wrapper.setLayout(layout)
 
@@ -77,7 +83,6 @@ class MainWindow(QMainWindow):
         self.rest_prob = n
         self.rp_ctl.value_label.setText(f'{self.rest_prob}%')
         print(f'rp_changed: {n}; self.rest_prob={self.rest_prob}')
-        
 
 
 app = QApplication(sys.argv)

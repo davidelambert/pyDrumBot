@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 import simpleaudio as sa
 
@@ -46,7 +47,11 @@ class MainWindow(QMainWindow):
         wrapper = QWidget()
         wrapper.setLayout(layout)
 
+        header_font = QFont()
+        header_font.setPointSize(24)
+        header_font.setBold(True)
         self.header = QLabel('drumbot')
+        self.header.setFont(header_font)
 
         self.bpm_ctl = LVSlider(label='Beats per Minute',
                                 value_range=(60, 240),

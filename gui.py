@@ -27,6 +27,13 @@ class LVSlider:
         self.slider.setTickInterval(tick_interval)
 
 
+class DurCB(QCheckBox):
+    def __init__(self, label: str, n_beats: float, checked=False):
+        super().__init__(text=label)
+        self.setChecked(checked)
+        self.n_beats = n_beats
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -35,7 +42,7 @@ class MainWindow(QMainWindow):
 
         self.bpm = 100
         self.rest_prob = 10
-        self.durations = []
+        self.durations = [0.25, 0.375, 0.5, 0.75, 1, 1.5]
         self.hands = []
         self.kick = True
         self.playing = False
@@ -66,6 +73,45 @@ class MainWindow(QMainWindow):
                                value_label_suffix='%')
         self.rp_ctl.slider.valueChanged.connect(self.rp_changed)
 
+        # DURATIONS
+        # ========================
+        self.dur_16 = DurCB('1/16', 0.25, True)
+        self.dur_16.stateChanged.connect(self.get_durations)
+        self.dur_16d = DurCB('1/16d', 0.375, True)
+        self.dur_16d.stateChanged.connect(self.get_durations)
+        self.dur_8 = DurCB('1/8', 0.5, True)
+        self.dur_8.stateChanged.connect(self.get_durations)
+        self.dur_8d = DurCB('1/8d', 0.75, True)
+        self.dur_8d.stateChanged.connect(self.get_durations)
+        self.dur_4 = DurCB('1/4', 1.0, True)
+        self.dur_4.stateChanged.connect(self.get_durations)
+        self.dur_4d = DurCB('1/4d', 1.5, True)
+        self.dur_4d.stateChanged.connect(self.get_durations)
+        self.dur_2 = DurCB('1/2', 2.0)
+        self.dur_2.stateChanged.connect(self.get_durations)
+        self.dur_2d = DurCB('1/2d', 3.0)
+        self.dur_2d.stateChanged.connect(self.get_durations)
+        self.dur_1 = DurCB('1/1', 4.0)
+        self.dur_1.stateChanged.connect(self.get_durations)
+
+        self.dur_list = [self.dur_16, self.dur_16d, self.dur_8, self.dur_8d,
+                         self.dur_4, self.dur_4d, self.dur_2, self.dur_2d,
+                         self.dur_1]
+
+        dur_layout = QGridLayout()
+        dur_layout.addWidget(self.dur_16, 0, 0)
+        dur_layout.addWidget(self.dur_16d, 1, 0)
+        dur_layout.addWidget(self.dur_8, 0, 1)
+        dur_layout.addWidget(self.dur_8d, 1, 1)
+        dur_layout.addWidget(self.dur_4, 0, 2)
+        dur_layout.addWidget(self.dur_4d, 1, 2)
+        dur_layout.addWidget(self.dur_2, 0, 3)
+        dur_layout.addWidget(self.dur_2d, 1, 3)
+        dur_layout.addWidget(self.dur_1, 0, 4)
+
+        self.dur_grp = QGroupBox('Durations')
+        self.dur_grp.setLayout(dur_layout)
+
         # row 0
         layout.addWidget(self.header, 0, 0)
         # row 1
@@ -76,6 +122,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.rp_ctl.label, 2, 0)
         layout.addWidget(self.rp_ctl.slider, 2, 1, 1, 4)
         layout.addWidget(self.rp_ctl.value_label, 2, 5, 1, 1)
+        # row 3
+        layout.addWidget(self.dur_grp, 3, 0, 1, 6)
 
         self.setCentralWidget(wrapper)
 
@@ -88,6 +136,20 @@ class MainWindow(QMainWindow):
         self.rest_prob = n
         self.rp_ctl.value_label.setText(f'{self.rest_prob}%')
         print(f'rp_changed: {n}; self.rest_prob={self.rest_prob}')
+
+    def get_durations(self):
+        for cb in self.dur_list:
+            if cb.isChecked():
+                if cb.n_beats in self.durations:
+                    pass
+                else:
+                    self.durations.append(cb.n_beats)
+            else:
+                if cb.n_beats in self.durations:
+                    self.durations.remove(cb.n_beats)
+                else:
+                    pass
+        print(sorted(self.durations))
 
 
 app = QApplication(sys.argv)

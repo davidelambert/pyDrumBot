@@ -1,15 +1,12 @@
 import sys
 from pathlib import Path
+import random
+import time
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 import simpleaudio as sa
-
-samples = {fp.stem: sa.WaveObject.from_wave_file(str(fp))
-           for fp in Path('./kit-default').iterdir()}
-hands = samples.copy()
-kick = hands.pop('kick')
 
 
 class LVSlider:
@@ -47,6 +44,11 @@ class MainWindow(QMainWindow):
         self.kick = True
         self.playing = False
 
+        self.samples = {fp.stem: sa.WaveObject.from_wave_file(str(fp))
+                        for fp in Path('./kit-default').iterdir()}
+        self.hands = self.samples.copy()
+        self.kick = self.hands.pop('kick')
+
         layout = QGridLayout()
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(24)
@@ -60,12 +62,16 @@ class MainWindow(QMainWindow):
         self.header = QLabel('drumbot')
         self.header.setFont(header_font)
 
+        # BPM CONTROL
+        # =====================
         self.bpm_ctl = LVSlider(label='Beats per Minute',
                                 value_range=(60, 240),
                                 tick_interval=20,
                                 initial_value=100)
         self.bpm_ctl.slider.valueChanged.connect(self.bpm_changed)
 
+        # REST PROBABILITY CONTROL
+        # ========================
         self.rp_ctl = LVSlider(label='Rest Probability',
                                value_range=(0, 99),
                                tick_interval=10,
@@ -112,8 +118,18 @@ class MainWindow(QMainWindow):
         self.dur_grp = QGroupBox('Durations')
         self.dur_grp.setLayout(dur_layout)
 
+        # ON/OFF
+        # ================================
+        self.onoff = QPushButton('On / Off')
+        self.onoff.setCheckable(True)
+        self.onoff.setChecked(self.playing)
+        self.onoff.clicked.connect(self.set_playing)
+
+        # GRID LAYOUT
+        # =================
         # row 0
-        layout.addWidget(self.header, 0, 0)
+        layout.addWidget(self.header, 0, 0, 1, 2)
+        layout.addWidget(self.onoff, 0, 3, 1, 3)
         # row 1
         layout.addWidget(self.bpm_ctl.label, 1, 0)
         layout.addWidget(self.bpm_ctl.slider, 1, 1, 1, 4)
@@ -126,6 +142,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.dur_grp, 3, 0, 1, 6)
 
         self.setCentralWidget(wrapper)
+        # END MainWindow.__init__()
 
     def bpm_changed(self, n):
         self.bpm = n
@@ -150,6 +167,10 @@ class MainWindow(QMainWindow):
                 else:
                     pass
         print(sorted(self.durations))
+
+    def set_playing(self, checked):
+        self.playing = checked
+        print(f'Playing: {self.playing}')
 
 
 app = QApplication(sys.argv)
